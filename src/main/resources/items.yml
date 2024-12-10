@@ -1,0 +1,9 @@
+items:
+  snowy_chestplate:
+    type: standard
+    material: LEATHER_CHESTPLATE
+    displayName: "Снежный нагрудник"
+    lore:
+      - "Греет грудь"
+    temperatureResistance: 1.0
+    radiationResistance: 0.5

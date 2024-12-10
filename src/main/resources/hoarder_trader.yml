@@ -1,0 +1,16 @@
+recipes:
+  recipe1:
+    result:
+      item: DIAMOND
+      amount: 1
+    maxUses: 10
+    ingredients:
+      - EMERALD:5
+  recipe2:
+    result:
+      item: WOODEN_SWORD
+      amount: 1
+    maxUses: 15
+    ingredients:
+      - COAL:2
+      - STICK:3

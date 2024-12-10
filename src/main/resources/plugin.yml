@@ -1,0 +1,11 @@
+name: LotusOffSeasonV2
+version: '1.0-SNAPSHOT'
+main: org.referix.lotusOffSeasonV2.LotusOffSeasonV2
+api-version: '1.21'
+soft-depend: [Oraxen]
+commands:
+  lotus:
+    description: Перезагрузка конфигурации плагина.
+    usage: /<command>
+    permission: lotusoffseason.armor
+    permission-message: "У вас нет прав для выполнения этой команды."
