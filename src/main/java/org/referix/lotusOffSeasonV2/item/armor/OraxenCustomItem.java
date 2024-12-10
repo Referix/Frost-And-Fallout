@@ -1,6 +1,7 @@
-package org.referix.lotusOffSeasonV2.armor;
+package org.referix.lotusOffSeasonV2.item.armor;
 
 import io.th0rgal.oraxen.api.OraxenItems;
+import io.th0rgal.oraxen.items.ItemBuilder;
 import org.bukkit.inventory.ItemStack;
 
 public class OraxenCustomItem implements CustomItem {
@@ -16,8 +17,12 @@ public class OraxenCustomItem implements CustomItem {
 
     @Override
     public ItemStack getItemStack() {
-        // Предполагаем, что Oraxen предоставляет метод для получения предмета
-        return OraxenItems.getItemById(oraxenId).build();
+        // Получение предмета через Oraxen API
+        ItemBuilder itemBuilder = OraxenItems.getItemById(oraxenId);
+        if (itemBuilder == null) {
+            throw new IllegalArgumentException("Oraxen предмет с ID '" + oraxenId + "' не найден.");
+        }
+        return itemBuilder.build();
     }
 
     @Override

@@ -28,7 +28,6 @@ public class TemperatureHandler {
     private double RADIUS_NEUTRAL = 32;
 
     private double RADIUS_HIGH_SPEED = -8;
-    private double RADIUS_MIDDLE_SPEED = -4;
     private double RADIUS_LOW_SPEED = -2;
     private double RADIUS_NEUTRAL_SPEED = -1;
 
@@ -82,6 +81,7 @@ public class TemperatureHandler {
         double distance = Math.sqrt(x*x + z*z);
 
         double radiusColdSpeed = 0;
+        double RADIUS_MIDDLE_SPEED = -4;
         if (distance > RADIUS_HIGH) radiusColdSpeed = RADIUS_HIGH_SPEED;
         else if (distance > RADIUS_MIDDLE) radiusColdSpeed = RADIUS_MIDDLE_SPEED;
         else if (distance > RADIUS_LOW) radiusColdSpeed = RADIUS_LOW_SPEED;
@@ -105,14 +105,15 @@ public class TemperatureHandler {
             for (int y = py -3; y <= py + 3; y++) {
                 for (int z = pz - 3; z <= pz + 3; z++) {
                     Block block = player.getWorld().getBlockAt(x, y, z);
+                    Material type = block.getType();
                     // Check if the block is a furnace
-                    if (block.getType() == Material.FURNACE || block.getType() == Material.BLAST_FURNACE || block.getType() == Material.SMOKER ) {
+                    if (type == Material.FURNACE || type == Material.BLAST_FURNACE || type == Material.SMOKER ) {
                         // Get block data and check if it is lit
                         if (block.getBlockData() instanceof org.bukkit.block.data.type.Furnace furnaceData && furnaceData.isLit()) {
                             heatingSum += FURNACE_SPEED;
                         }
                     }
-                    if (block.getType() == Material.CAMPFIRE || block.getType() == Material.SOUL_CAMPFIRE) {
+                    if (type == Material.CAMPFIRE || type == Material.SOUL_CAMPFIRE) {
                         Campfire campfire = (Campfire) block.getBlockData();
                         if (campfire.isLit()){
                             heatingSum += FURNACE_SPEED;
@@ -128,8 +129,31 @@ public class TemperatureHandler {
 
 
 
+    public double calculateRelativeValue(double value) {
+        double relValue = (MIN_TEMPERATURE - value) / (MIN_TEMPERATURE - MAX_TEMPERATURE);
+        return Math.clamp(relValue, 0, 1);
+    }
 
 
+
+    public String createProgressBar(double absoluteValue, String label,boolean showValue) {
+        int totalBars = 10; // Общая длина полоски
+        double relValue = 1 - (MIN_TEMPERATURE - absoluteValue) / (MIN_TEMPERATURE - MAX_TEMPERATURE);
+        relValue = Math.clamp(relValue, 0, 1);
+        int filledBars = (int) Math.round(relValue * totalBars); // Количество заполненных
+
+        StringBuilder bar = new StringBuilder(label + ": ");
+        for (int i = 0; i < totalBars; i++) {
+            bar.append(i < filledBars ? "█" : "░");
+        }
+        if (showValue) {
+            return String.format("%s %2.1f", bar, absoluteValue);
+        } else return String.format("%s", bar);
+    }
+
+    public double clamped(double value){
+        return Math.clamp(value,MIN_TEMPERATURE,MAX_TEMPERATURE);
+    }
 
 //    private static boolean isCampfire(Block block) {
 //        if (block.getType() == Material.CAMPFIRE || block.getType() == Material.SOUL_CAMPFIRE) {

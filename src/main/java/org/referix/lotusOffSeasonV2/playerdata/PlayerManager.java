@@ -42,14 +42,18 @@ public class PlayerManager {
                     double temperatureResistance = data.getTemperatureResistance();
                     temperatureValue = TemperatureHandler.getInstance().calculate(player,temperatureValue,temperatureResistance);
                     data.setTemperatureValue(temperatureValue);
-                   // System.out.println("Winter" + temperatureValue + " "  + temperatureResistance);
+//                    System.out.println("Winter: " + temperatureValue + " "  + temperatureResistance);
 
                    // radiation
                     double radiationValue = data.getRadiationValue();
                     double radiationResistance = data.getRadiationResistance();
                     radiationValue = RadiationHandler.getInstance().calculate(player,radiationValue,radiationResistance);
                     data.setRadiationValue(radiationValue);
-                    System.out.println("Radiation: " + radiationValue + " "  + radiationResistance);
+//                    System.out.println("Radiation: " + radiationValue + " "  + radiationResistance);
+
+
+
+
 
                 }
             }

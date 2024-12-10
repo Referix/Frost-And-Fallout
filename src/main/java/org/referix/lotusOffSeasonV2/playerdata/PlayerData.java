@@ -3,6 +3,8 @@ package org.referix.lotusOffSeasonV2.playerdata;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.referix.lotusOffSeasonV2.LotusOffSeasonV2;
+import org.referix.lotusOffSeasonV2.handlers.RadiationHandler;
+import org.referix.lotusOffSeasonV2.handlers.TemperatureHandler;
 
 public class PlayerData {
     private final Player player;
@@ -41,7 +43,8 @@ public class PlayerData {
     }
 
     public void setRadiationValue(double radiationValue) {
-        player.setMetadata("radiationValue", new FixedMetadataValue(LotusOffSeasonV2.getInstance(), Math.max(radiationValue, 0)));
+        double value = RadiationHandler.getInstance().clamped(radiationValue);
+        player.setMetadata("radiationValue", new FixedMetadataValue(LotusOffSeasonV2.getInstance(), value));
         this.radiationValue = radiationValue;
     }
 
@@ -51,7 +54,8 @@ public class PlayerData {
     }
 
     public void setTemperatureValue(double temperatureValue) {
-        player.setMetadata("temperatureValue", new FixedMetadataValue(LotusOffSeasonV2.getInstance(), Math.max(temperatureValue, 0)));
+        double value = TemperatureHandler.getInstance().clamped(temperatureValue);
+        player.setMetadata("temperatureValue", new FixedMetadataValue(LotusOffSeasonV2.getInstance(), value));
         this.temperatureValue = temperatureValue;
     }
 

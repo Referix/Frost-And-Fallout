@@ -18,179 +18,20 @@ import org.bukkit.persistence.PersistentDataType;
 import org.referix.lotusOffSeasonV2.LotusOffSeasonV2;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class HolderManager implements Listener {
     private final Map<String, Holder> holders = new HashMap<>();
     private final NamespacedKey UNIQUE_ID_KEY; // Ключ для PersistentDataContainer
-    private final HoarderConfig hoarderConfig; // Посилання на конфігурацію
+    private final HoarderConfig hoarderConfig; // Ссылка на конфигурацию
 
-    // Конструктор HolderManager із передачею конфігурації
+    // Конструктор HolderManager с передачей конфигурации
     public HolderManager(HoarderConfig hoarderConfig) {
         this.hoarderConfig = hoarderConfig;
         this.UNIQUE_ID_KEY = new NamespacedKey(LotusOffSeasonV2.getInstance(), "custom_holder");
 
         // Регистрация событий
         Bukkit.getPluginManager().registerEvents(this, LotusOffSeasonV2.getInstance());
-    }
-
-    // Додавання Holder до мапи
-    public void addHolder(Holder holder) {
-        String id = holder.getName(); // Використовуємо ім'я як унікальний ID
-        if (holders.containsKey(id)) {
-            Bukkit.getLogger().warning("Holder з ім'ям (ID) " + id + " вже існує.");
-            return;
-        }
-        holders.put(id, holder);
-        Bukkit.getLogger().info("Holder доданий: " + holder);
-    }
-
-    // Видалення Holder із мапи та видалення пов'язаного Villager
-    public void removeHolder(String name) {
-        Holder removedHolder = holders.remove(name);
-        if (removedHolder != null) {
-            Bukkit.getLogger().info("Holder видалений: " + removedHolder);
-
-            // Видаляємо Villager, пов'язаного з Holder
-            Bukkit.getWorlds().forEach(world ->
-                    world.getEntitiesByClass(Villager.class).forEach(villager -> {
-                        PersistentDataContainer dataContainer = villager.getPersistentDataContainer();
-                        if (dataContainer.has(UNIQUE_ID_KEY, PersistentDataType.STRING)) {
-                            String villagerName = dataContainer.get(UNIQUE_ID_KEY, PersistentDataType.STRING);
-                            if (villagerName != null && villagerName.equals(name)) {
-                                villager.remove();
-                                Bukkit.getLogger().info("Villager з ім'ям (ID) " + name + " видалений.");
-                            }
-                        }
-                    })
-            );
-        } else {
-            Bukkit.getLogger().warning("Holder з ім'ям (ID) " + name + " не знайдено.");
-        }
-    }
-
-    // Пошук Holder за ім'ям (ID)
-    public Holder getHolderByName(String name) {
-        return holders.get(name);
-    }
-
-    // Спавн Villager, пов'язаного з Holder
-    public Villager spawnHolderVillager(Holder holder, Location location) {
-        if (holder == null || location == null) {
-            Bukkit.getLogger().warning("Holder або локація не можуть бути null.");
-            return null;
-        }
-
-        // Створення Villager
-        Villager villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
-
-        // Устанавливаем уникальный ID в PersistentDataContainer
-        PersistentDataContainer dataContainer = villager.getPersistentDataContainer();
-        dataContainer.set(UNIQUE_ID_KEY, PersistentDataType.STRING, holder.getName());
-
-        configureVillager(villager, holder);
-
-        Bukkit.getLogger().info("Villager створений для Holder " + holder.getName() + ".");
-        return villager;
-    }
-
-    // Конфігурація Villager
-    private void configureVillager(Villager villager, Holder holder) {
-        // Встановлюємо кастомне ім'я
-        villager.setCustomName(holder.getName());
-        villager.setCustomNameVisible(true);
-
-        // Робимо невразливим, нерухомим, без інтелекту
-        villager.setAI(false);
-        villager.setInvulnerable(true);
-        villager.setVillagerType(Villager.Type.SWAMP);
-        villager.setHealth(20); // Мінімальне HP
-        villager.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(0.0);
-        villager.setCollidable(false);
-
-        // Завантажуємо трейди для Holder із конфігурації
-        List<MerchantRecipe> recipes = getHolderRecipes(holder);
-        if (recipes != null && !recipes.isEmpty()) {
-            villager.setRecipes(recipes);
-            Bukkit.getLogger().info("Трейди для Holder " + holder.getName() + " встановлені.");
-        } else {
-            Bukkit.getLogger().warning("Не вдалося знайти трейди для Holder " + holder.getName() + ".");
-        }
-    }
-
-    // Метод для отримання трейдів із HoarderConfig
-    private List<MerchantRecipe> getHolderRecipes(Holder holder) {
-        return hoarderConfig.getTraderRecipes();
-    }
-
-    // Захист жителів від пошкоджень
-    @EventHandler
-    public void onEntityDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Villager villager) {
-            // Проверяем наличие уникального ID в PersistentDataContainer
-            PersistentDataContainer dataContainer = villager.getPersistentDataContainer();
-            if (dataContainer.has(UNIQUE_ID_KEY, PersistentDataType.STRING)) {
-                event.setCancelled(true);
-                Bukkit.getLogger().info("Попытка повредить защищённого жителя заблокирована.");
-            }
-        }
-    }
-
-    // Перезавантаження конфігурації та перевірка жителів
-    public void reloadConfigAndVillagers() {
-        // Перезавантаження конфігурації
-        hoarderConfig.reloadConfig();
-        Bukkit.getLogger().info("Конфігурацію hoarder_trader.yml успішно перезавантажено.");
-
-        // Перевірка всіх жителів у світі
-        for (World world : Bukkit.getWorlds()) {
-            for (Villager villager : world.getEntitiesByClass(Villager.class)) {
-                PersistentDataContainer dataContainer = villager.getPersistentDataContainer();
-                if (dataContainer.has(UNIQUE_ID_KEY, PersistentDataType.STRING)) {
-                    String holderName = dataContainer.get(UNIQUE_ID_KEY, PersistentDataType.STRING);
-                    if (holderName != null) {
-                        Holder holder = holders.get(holderName);
-                        if (holder != null) {
-                            configureVillager(villager, holder);
-                            Bukkit.getLogger().info("Житель з ID '" + holderName + "' успішно оновлений.");
-                        } else {
-                            Bukkit.getLogger().warning("Житель з ID '" + holderName + "' не має відповідного Holder.");
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Повертає список усіх імен Holder
-    public List<String> getHolderNames() {
-        return new ArrayList<>(holders.keySet());
-    }
-
-    public void saveHoldersToFile() {
-        File file = new File(LotusOffSeasonV2.getInstance().getDataFolder(), "holders.yml");
-        YamlConfiguration config = new YamlConfiguration();
-
-        for (Map.Entry<String, Holder> entry : holders.entrySet()) {
-            String holderName = entry.getKey();
-            Holder holder = entry.getValue();
-
-            // Сохраняем данные о Holder
-            ConfigurationSection section = config.createSection(holderName);
-            section.set("name", holder.getName());
-            section.set("description", holder.getDescription());
-        }
-
-        try {
-            config.save(file);
-            Bukkit.getLogger().info("Данные Holders успешно сохранены.");
-        } catch (IOException e) {
-            Bukkit.getLogger().severe("Ошибка при сохранении данных Holders: " + e.getMessage());
-        }
     }
 
     public void loadHoldersFromFile() {
@@ -202,52 +43,205 @@ public class HolderManager implements Listener {
 
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        for (String holderName : config.getKeys(false)) {
-            ConfigurationSection section = config.getConfigurationSection(holderName);
+        for (String holderId : config.getKeys(false)) {
+            ConfigurationSection section = config.getConfigurationSection(holderId);
             if (section != null) {
-                String name = section.getString("name");
-                String description = section.getString("description");
+                String name = section.getString("name", holderId); // Если имя не указано, используем ID
+                String description = section.getString("description", "Без описания");
+                String villagerPreset = section.getString("villagerPreset", "default"); // Значение по умолчанию
 
-                // Восстанавливаем Holder и добавляем в карту
-                Holder holder = new Holder(name, name, description);
-                holders.put(name, holder);
+                // Используем addHolder для добавления
+                addHolder(new Holder(holderId, name, description, villagerPreset));
             }
         }
 
-        Bukkit.getLogger().info("Данные Holders успешно загружены.");
+        Bukkit.getLogger().info("Данные Holders успешно загружены из holders.yml.");
     }
 
-    public void refreshVillagerTrades() {
-        Bukkit.getScheduler().runTaskTimer(LotusOffSeasonV2.getInstance(), () -> {
-            for (World world : Bukkit.getWorlds()) {
-                for (Villager villager : world.getEntitiesByClass(Villager.class)) {
-                    PersistentDataContainer dataContainer = villager.getPersistentDataContainer();
-                    if (dataContainer.has(UNIQUE_ID_KEY, PersistentDataType.STRING)) {
-                        String holderName = dataContainer.get(UNIQUE_ID_KEY, PersistentDataType.STRING);
-                        Holder holder = holders.get(holderName);
 
-                        if (holder != null) {
-                            List<MerchantRecipe> recipes = villager.getRecipes();
-                            boolean updated = false; // Флаг, чтобы понять, были ли обновлены рецепты
 
-                            for (MerchantRecipe recipe : recipes) {
-                                if (recipe.getUses() >= recipe.getMaxUses()) { // Проверяем, исчерпан ли maxUsage
-                                    recipe.setUses(0); // Сбрасываем использование
-                                    updated = true;
-                                }
-                            }
+    // Добавление Holder в карту
+    public void addHolder(Holder holder) {
+        if (!holder.hasPreset()) {
+            Bukkit.getLogger().warning("Пресет '" + holder.getVillagerPreset() + "' для Holder '" + holder.getName() + "' не существует.");
+            return;
+        }
 
-                            if (updated) { // Обновляем рецепты только если что-то изменилось
-                                villager.setRecipes(recipes);
-                                Bukkit.getLogger().info("Ресурсы трейдов для жителя '" + holderName + "' обновлены.");
+        String id = holder.getName();
+        if (holders.containsKey(id)) {
+            Bukkit.getLogger().warning("Holder с именем (ID) " + id + " уже существует.");
+            return;
+        }
+
+        holders.put(id, holder);
+        Bukkit.getLogger().info("Holder добавлен: " + holder);
+    }
+
+
+    // Удаление Holder из карты и удаление связанного Villager
+    public void removeHolder(String name) {
+        Holder removedHolder = holders.remove(name);
+        if (removedHolder != null) {
+            Bukkit.getLogger().info("Holder удален: " + removedHolder);
+
+            // Удаляем Villager, связанного с Holder
+            Bukkit.getWorlds().forEach(world ->
+                    world.getEntitiesByClass(Villager.class).forEach(villager -> {
+                        PersistentDataContainer dataContainer = villager.getPersistentDataContainer();
+                        if (dataContainer.has(UNIQUE_ID_KEY, PersistentDataType.STRING)) {
+                            String villagerName = dataContainer.get(UNIQUE_ID_KEY, PersistentDataType.STRING);
+                            if (villagerName != null && villagerName.equals(name)) {
+                                villager.remove();
+                                Bukkit.getLogger().info("Villager с именем (ID) " + name + " удален.");
                             }
                         }
+                    })
+            );
+        } else {
+            Bukkit.getLogger().warning("Holder с именем (ID) " + name + " не найден.");
+        }
+    }
+
+    // Поиск Holder по имени (ID)
+    public Holder getHolderByName(String name) {
+        return holders.get(name);
+    }
+
+    public List<String> getHolderNames() {
+        return new ArrayList<>(holders.keySet());
+    }
+
+    public void spawnHolderVillager(String customName, String villagerPreset, Location location) {
+        if (villagerPreset == null || location == null || customName == null || customName.trim().isEmpty()) {
+            Bukkit.getLogger().warning("Имя жителя, пресет или локация не могут быть null или пустыми.");
+            return;
+        }
+
+        if (holders.containsKey(customName)) {
+            Bukkit.getLogger().warning("Житель с именем '" + customName + "' уже существует.");
+            return;
+        }
+
+        if (!hoarderConfig.hasPreset(villagerPreset)) {
+            Bukkit.getLogger().warning("Пресет '" + villagerPreset + "' не существует.");
+            return;
+        }
+
+        if (location.getWorld() == null) {
+            Bukkit.getLogger().warning("Мир для локации не найден. Невозможно создать жителя.");
+            return;
+        }
+
+        List<MerchantRecipe> recipes = hoarderConfig.getRecipesForVillager(villagerPreset);
+        if (recipes.isEmpty()) {
+            Bukkit.getLogger().warning("Не найдены рецепты для пресета жителя: " + villagerPreset);
+            return;
+        }
+
+        // Создание Villager
+        Villager villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
+
+        // Устанавливаем уникальный ID в PersistentDataContainer
+        PersistentDataContainer dataContainer = villager.getPersistentDataContainer();
+        dataContainer.set(UNIQUE_ID_KEY, PersistentDataType.STRING, customName);
+
+        configureVillager(villager, recipes, customName);
+
+        // Добавляем Holder
+        addHolder(new Holder(customName, customName, "Житель, созданный автоматически.", villagerPreset));
+        Bukkit.getLogger().info("Villager с именем '" + customName + "' создан для пресета: " + villagerPreset);
+    }
+
+
+    // Конфигурация Villager
+    private void configureVillager(Villager villager, List<MerchantRecipe> recipes, String customName) {
+        villager.setCustomName(customName);
+        villager.setCustomNameVisible(true);
+
+        // Делаем невосприимчивым к урону и отключаем AI
+        villager.setAI(false);
+        villager.setInvulnerable(true);
+        villager.setVillagerType(Villager.Type.SWAMP);
+        villager.setHealth(20); // Минимальное HP
+        villager.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(0.0);
+        villager.setCollidable(false);
+
+        // Устанавливаем трейды
+        villager.setRecipes(recipes);
+    }
+
+    // Защита жителей от повреждений
+    @EventHandler
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Villager villager) {
+            PersistentDataContainer dataContainer = villager.getPersistentDataContainer();
+            if (dataContainer.has(UNIQUE_ID_KEY, PersistentDataType.STRING)) {
+                event.setCancelled(true);
+                Bukkit.getLogger().info("Попытка повредить защищённого жителя заблокирована.");
+            }
+        }
+    }
+
+    public void updateHolderPreset(String name, String newVillagerPreset) {
+        Holder holder = holders.get(name);
+        if (holder == null) {
+            Bukkit.getLogger().warning("Holder с именем '" + name + "' не найден.");
+            return;
+        }
+
+        if (!hoarderConfig.hasPreset(newVillagerPreset)) {
+            Bukkit.getLogger().warning("Пресет '" + newVillagerPreset + "' не существует. Обновление прервано.");
+            return;
+        }
+
+        holder.setVillagerPreset(newVillagerPreset);
+        Bukkit.getLogger().info("Пресет для Holder '" + name + "' обновлён на '" + newVillagerPreset + "'.");
+    }
+
+
+
+    public void reloadConfigAndVillagers() {
+        hoarderConfig.reloadConfig();
+        Bukkit.getLogger().info("Конфигурация hoarder_trader.yml успешно перезагружена.");
+
+        // Обновляем пресеты в Holder
+        for (Map.Entry<String, Holder> entry : holders.entrySet()) {
+            String name = entry.getKey();
+            Holder holder = entry.getValue();
+
+            if (!holder.hasPreset()) {
+                Bukkit.getLogger().warning("Пресет '" + holder.getVillagerPreset() + "' для Holder '" + name + "' больше не существует.");
+            }
+        }
+
+        // Проверка всех жителей в мире
+        for (World world : Bukkit.getWorlds()) {
+            for (Villager villager : world.getEntitiesByClass(Villager.class)) {
+                PersistentDataContainer dataContainer = villager.getPersistentDataContainer();
+                if (dataContainer.has(UNIQUE_ID_KEY, PersistentDataType.STRING)) {
+                    String holderName = dataContainer.get(UNIQUE_ID_KEY, PersistentDataType.STRING);
+                    Holder holder = holders.get(holderName);
+
+                    if (holder == null) {
+                        Bukkit.getLogger().warning("Житель с именем '" + holderName + "' больше не привязан к существующему Holder.");
+                        continue;
+                    }
+
+                    if (!holder.hasPreset()) {
+                        Bukkit.getLogger().warning("Пресет '" + holder.getVillagerPreset() + "' для жителя '" + holderName + "' больше не существует.");
+                        continue;
+                    }
+
+                    List<MerchantRecipe> recipes = hoarderConfig.getRecipesForVillager(holder.getVillagerPreset());
+                    if (!recipes.isEmpty()) {
+                        configureVillager(villager, recipes, holder.getName());
+                        Bukkit.getLogger().info("Житель с именем '" + holderName + "' обновлён с пресетом '" + holder.getVillagerPreset() + "'.");
+                    } else {
+                        Bukkit.getLogger().warning("Житель с именем '" + holderName + "' не имеет доступных рецептов.");
                     }
                 }
             }
-        }, 0L, 2000L); // Проверка каждые 10 секунд (200 тиков)
+        }
     }
-
-
 
 }

@@ -1,3 +1,12 @@
+villagers:
+  villager1:
+    recipes:
+      - recipe1
+      - recipe2
+  villager2:
+    recipes:
+      - recipe3
+
 recipes:
   recipe1:
     result:
@@ -14,3 +23,10 @@ recipes:
     ingredients:
       - COAL:2
       - STICK:3
+  recipe3:
+    result:
+      item: STONE
+      amount: 2
+    maxUses: 5
+    ingredients:
+      - COBBLESTONE:8

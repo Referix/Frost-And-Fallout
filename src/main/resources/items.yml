@@ -1,3 +1,32 @@
+eat_item:
+  testeat:
+    type: standard
+    material: APPLE
+    displayName: "Счетчик Гейгера"
+    foodValue:
+      radiation: 0
+      temperature: 10
+    #  oraxen_viewer:
+    #    type: oraxen
+    #    oraxenId: "oraxen_viewer_id"
+    #     foodValue:
+    #      radiation: 0
+    #      temperature: 10
+
+view_item:
+  winter_viewer:
+    type: standard
+    material: CLOCK
+    displayName: "Счетчик Гейгера"
+    view_type: RADIATION
+    lore:
+      - "Кажется, эта штука полезная..."
+  #  oraxen_viewer:
+  #    type: oraxen
+  #    oraxenId: "oraxen_viewer_id"
+  #    view_type: RADIATION
+
+
 items:
   snowy_chestplate:
     type: standard
@@ -7,3 +36,8 @@ items:
       - "Греет грудь"
     temperatureResistance: 1.0
     radiationResistance: 0.5
+  #  oraxen_chestplate:
+  #    type: oraxen
+  #    oraxenId: "oraxen_chestplate_id"
+  #    temperatureResistance: 2.0
+  #    radiationResistance: 1.0

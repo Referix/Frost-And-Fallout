@@ -23,7 +23,7 @@ public class RadiationHandler {
 
     public double calculate(Player player, double value, double resistance){
         double speed = 0;
-        double new_value = value + resistance;
+        double new_value = value + (-resistance);
 
 
         double y = player.getLocation().getBlockY();
@@ -35,7 +35,7 @@ public class RadiationHandler {
         }
 
         double radiationSpeed = 0 + 1 * heightRadiationSpeed;
-        System.out.format("radiationSpeed: %.2f%n", radiationSpeed);
+        //System.out.format("radiationSpeed: %.2f%n", radiationSpeed);
 
         new_value += radiationSpeed;
 
@@ -43,4 +43,30 @@ public class RadiationHandler {
 
         return new_value;
     }
+
+//    public double calculateRelativeValue(double value) {
+//        double relValue = (MIN_RADIATION_VALUE - value) / (MIN_RADIATION_VALUE - MAX_RADIATION_VALUE);
+//        return Math.clamp(relValue, 0, 1);
+//    }
+
+
+    public String createProgressBar(double absoluteValue, String label) {
+        int totalBars = 10; // Общая длина полоски
+        double relativeValue = (MIN_RADIATION_VALUE - absoluteValue) / (MIN_RADIATION_VALUE - MAX_RADIATION_VALUE);
+        relativeValue = Math.clamp(relativeValue, 0, 1);
+        int filledBars = (int) Math.round(relativeValue * totalBars); // Количество заполненных
+
+        StringBuilder bar = new StringBuilder(label + ": ");
+        for (int i = 0; i < totalBars; i++) {
+            bar.append(i < filledBars ? "█" : "░");
+        }
+
+        return String.format("%s %2.1f", bar, absoluteValue);
+    }
+
+
+    public double clamped(double value){
+        return Math.clamp(value, MIN_RADIATION_VALUE, MAX_RADIATION_VALUE);
+    }
+
 }

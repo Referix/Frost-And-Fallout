@@ -5,8 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.referix.lotusOffSeasonV2.armor.CustomItem;
-import org.referix.lotusOffSeasonV2.armor.CustomItemManager;
+import org.referix.lotusOffSeasonV2.item.armor.CustomItem;
+import org.referix.lotusOffSeasonV2.item.CustomItemManager;
 import org.referix.lotusOffSeasonV2.playerdata.PlayerManager;
 
 public class ArmorEvent implements Listener {
@@ -24,6 +24,7 @@ public class ArmorEvent implements Listener {
 
     public void onArmorChanged(Player player) {
         double temperatureResistance = 0;
+        double radiationResistance = 0;
 
         ItemStack[] armorContents = player.getInventory().getArmorContents(); // Получаем предметы брони
 
@@ -34,11 +35,14 @@ public class ArmorEvent implements Listener {
             CustomItem customItem = customItemManager.getCustomItemByItemStack(armorPiece);
             if (customItem != null) {
                 temperatureResistance += customItem.getTemperatureResistance();
+                radiationResistance += customItem.getRadiationResistance();
             }
         }
 
         // Устанавливаем сопротивление для игрока
         PlayerManager.getInstance().getPlayerData(player).setTemperatureResistance(temperatureResistance);
+        PlayerManager.getInstance().getPlayerData(player).setRadiationResistance(radiationResistance);
         System.out.println("Сопротивление температуре: " + temperatureResistance);
+        System.out.println("Сопротивление радиции: " + radiationResistance);
     }
 }
