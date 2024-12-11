@@ -1,7 +1,11 @@
 package org.referix.lotusOffSeasonV2.playerdata;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.referix.lotusOffSeasonV2.LotusOffSeasonV2;
@@ -10,6 +14,7 @@ import org.referix.lotusOffSeasonV2.handlers.TemperatureHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class PlayerManager {
 
@@ -49,16 +54,19 @@ public class PlayerManager {
                     double radiationResistance = data.getRadiationResistance();
                     radiationValue = RadiationHandler.getInstance().calculate(player,radiationValue,radiationResistance);
                     data.setRadiationValue(radiationValue);
-//                    System.out.println("Radiation: " + radiationValue + " "  + radiationResistance);
+                    System.out.println("Radiation: " + radiationValue + " "  + radiationResistance);
 
 
-
-
+                    TemperatureHandler.getInstance().applyDamageEffect(player,temperatureValue);
+                    RadiationHandler.getInstance().applyDamageEffect(player,radiationValue);
 
                 }
             }
         }.runTaskTimer(LotusOffSeasonV2.getInstance(), 0, 20);
     }
+
+
+
 
     public BukkitTask getGlobalTask() {
         return globalTask;

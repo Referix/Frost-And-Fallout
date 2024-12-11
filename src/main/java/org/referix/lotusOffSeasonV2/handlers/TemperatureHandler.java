@@ -1,20 +1,25 @@
 package org.referix.lotusOffSeasonV2.handlers;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Campfire;
 import org.bukkit.block.data.type.Furnace;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.referix.lotusOffSeasonV2.LotusOffSeasonV2;
 import org.referix.lotusOffSeasonV2.helpers.CampfireObserver;
 import org.referix.lotusOffSeasonV2.playerdata.PlayerManager;
 
+import java.util.Random;
+
 public class TemperatureHandler {
 
     private double MAX_TEMPERATURE = 30;
-    private double MIN_PLAYER_TEMPERATURE = 10;
+    private double MIN_PLAYER_TEMPERATURE = 0;
     private double MIN_TEMPERATURE = -40;
 
     private double HEIGHT_LOW = 50;
@@ -153,6 +158,38 @@ public class TemperatureHandler {
 
     public double clamped(double value){
         return Math.clamp(value,MIN_TEMPERATURE,MAX_TEMPERATURE);
+    }
+
+//    private double MAX_TEMPERATURE = 30;
+//    private double MIN_PLAYER_TEMPERATURE = 0;
+//    private double MIN_TEMPERATURE = -40;
+
+    public void applyDamageEffect(Player player,double temperatureValue) {
+        if (temperatureValue > MIN_PLAYER_TEMPERATURE) return;
+        PotionEffect slowEffect = new PotionEffect(PotionEffectType.SLOWNESS, 200, 1);
+        PotionEffect weaknessEffect = new PotionEffect(PotionEffectType.WEAKNESS, 200, 1);
+        double hp = player.getHealth();
+        hp = Math.max(0, hp - 1);
+        player.setHealth(hp);
+        if (!player.hasPotionEffect(PotionEffectType.SLOWNESS) && !player.hasPotionEffect(PotionEffectType.WEAKNESS)) {
+            player.sendMessage(ChatColor.RED + "Вы замерзаете!");
+            player.addPotionEffect(slowEffect);
+            player.addPotionEffect(weaknessEffect);
+            player.setFreezeTicks(600); // 30 секунд замороження
+            int random = new Random().nextInt(100);
+            if (random < 30) {
+                if (!player.getInventory().getItemInMainHand().getType().isAir()) {
+                    // Отримуємо місцезнаходження гравця для дропу предмета
+                    Location playerLocation = player.getLocation();
+
+                    // Дропаємо предмет на місцезнаходження гравця
+                    player.getWorld().dropItemNaturally(playerLocation, player.getInventory().getItemInMainHand());
+
+                    // Забираємо предмет з руки гравця
+                    player.getInventory().setItemInMainHand(null);
+                }
+            }
+        }
     }
 
 //    private static boolean isCampfire(Block block) {

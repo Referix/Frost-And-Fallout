@@ -33,6 +33,7 @@ public class ArmorEvent implements Listener {
 
             // Проверяем, зарегистрирован ли предмет в CustomItemManager
             CustomItem customItem = customItemManager.getCustomItemByItemStack(armorPiece);
+            System.out.println("Найдено " + customItem);
             if (customItem != null) {
                 temperatureResistance += customItem.getTemperatureResistance();
                 radiationResistance += customItem.getRadiationResistance();

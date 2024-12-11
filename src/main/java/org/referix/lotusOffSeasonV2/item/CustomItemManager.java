@@ -2,9 +2,13 @@ package org.referix.lotusOffSeasonV2.item;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.referix.lotusOffSeasonV2.LotusOffSeasonV2;
 import org.referix.lotusOffSeasonV2.item.armor.CustomItem;
 import org.referix.lotusOffSeasonV2.item.armor.OraxenCustomItem;
@@ -210,14 +214,55 @@ public class CustomItemManager {
             return null;
         }
 
+
+
+        NamespacedKey idKey = new NamespacedKey("oraxen", "id");
+        String oraxenId = itemStack.getItemMeta().getPersistentDataContainer().get(idKey, PersistentDataType.STRING);
+        System.out.println(" ");
+        System.out.println("Oraxen id: " + oraxenId);
+
+        if (oraxenId != null) {
+            for (CustomItem item : items.values()) {
+
+                String itemOraxenId = item.getItemStack().getItemMeta().getPersistentDataContainer().get(idKey, PersistentDataType.STRING);
+
+                if (oraxenId.equals(itemOraxenId)) {
+                    System.out.println("FOUNNND WITH ORAXEN ITEM");
+                    return item;
+                }
+            }
+        }
+
+
+        System.out.println("Проверка без praxen");
+
+        if (!itemStack.getItemMeta().hasItemFlag(ItemFlag.HIDE_ARMOR_TRIM)) {
+            return null;
+        }
+
         for (CustomItem item : items.values()) {
-            if (item.getItemStack().isSimilar(itemStack)) {
+//            System.out.println(itemStack);
+//            System.out.println(item.getItemStack());
+//            System.out.println(" ");
+//            System.out.println(" ");
+//            System.out.println(" ");
+            ItemStack customItemStack = item.getItemStack();
+            if (customItemStack == null || !customItemStack.hasItemMeta()) {
+                continue;
+            }
+
+            var customMeta = customItemStack.getItemMeta();
+            var itemMeta = itemStack.getItemMeta();
+
+            if (customMeta.displayName() != null && customMeta.displayName().equals(itemMeta.displayName()) &&
+                    customMeta.lore() != null && customMeta.lore().equals(itemMeta.lore())) {
                 return item;
             }
         }
 
         return null;
     }
+
 
     public ViewType getViewItemByItemStack(ItemStack itemStack) {
         if (itemStack == null || !itemStack.hasItemMeta()) {

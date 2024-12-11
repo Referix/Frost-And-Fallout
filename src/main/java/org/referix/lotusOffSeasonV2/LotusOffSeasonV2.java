@@ -3,6 +3,8 @@ package org.referix.lotusOffSeasonV2;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.referix.lotusOffSeasonV2.database.hibernate.playerdata.PlayerDataServiceImpl;
+import org.referix.lotusOffSeasonV2.database.hibernate.structures.StructureDataService;
+import org.referix.lotusOffSeasonV2.database.hibernate.structures.StructureDataServiceImpl;
 import org.referix.lotusOffSeasonV2.event.EatEvent;
 import org.referix.lotusOffSeasonV2.event.JoinLeaveEvent;
 import org.referix.lotusOffSeasonV2.item.CustomItemManager;
@@ -25,6 +27,10 @@ public final class LotusOffSeasonV2 extends JavaPlugin {
     private HolderManager holderManager;
 
     private PlayerDataServiceImpl playerDataBase;
+
+
+
+    private StructureDataService structureDataService;
 
     @Override
     public void onEnable() {
@@ -49,6 +55,11 @@ public final class LotusOffSeasonV2 extends JavaPlugin {
         holderManager.loadHoldersFromFile();
 
         new MainCommand("lotus", itemManager,holderManager);
+
+
+
+        //test
+        structureDataService = new StructureDataServiceImpl();
     }
 
     @Override

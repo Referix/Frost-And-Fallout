@@ -1,6 +1,8 @@
 package org.referix.lotusOffSeasonV2.handlers;
 
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class RadiationHandler {
 
@@ -67,6 +69,30 @@ public class RadiationHandler {
 
     public double clamped(double value){
         return Math.clamp(value, MIN_RADIATION_VALUE, MAX_RADIATION_VALUE);
+    }
+
+
+    public void applyDamageEffect(Player player, double radiationValue) {
+        if (radiationValue < MAX_RADIATION_VALUE) return;
+        PotionEffect slowEffect = new PotionEffect(PotionEffectType.SLOWNESS, 200, 1);
+        PotionEffect weaknessEffect = new PotionEffect(PotionEffectType.WEAKNESS, 200, 1);
+        PotionEffect poisonEffect = new PotionEffect(PotionEffectType.POISON, 200, 1);
+        double hp = player.getHealth();
+        hp = Math.max(0, hp - 1);
+        player.setHealth(hp);
+        if (!player.hasPotionEffect(PotionEffectType.SLOWNESS) &&
+                !player.hasPotionEffect(PotionEffectType.WEAKNESS) &&
+                !player.hasPotionEffect(PotionEffectType.POISON)) {
+
+            player.addPotionEffect(slowEffect);
+            player.addPotionEffect(weaknessEffect);
+            player.addPotionEffect(poisonEffect);
+
+            // Додатковий урон
+            if (player.getHealth() > 2.0) {
+                player.damage(6.0); // Завдає 3 серця урону
+            }
+        }
     }
 
 }

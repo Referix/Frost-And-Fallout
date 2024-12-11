@@ -17,6 +17,12 @@ repositories {
         url = "https://oss.sonatype.org/content/groups/public/"
     }
     maven {
+        name = "enginehub-repo"
+        url = "https://maven.enginehub.org/repo/"
+    }
+    maven { url 'https://jitpack.io' }
+    maven { url "https://repository.jboss.org/nexus/content/repositories/releases/" } // JBoss репозиторій
+    maven {
         url "https://repo.oraxen.com/releases"
     }
 }
@@ -24,7 +30,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
     compileOnly 'io.th0rgal:oraxen:1.184.1'
-
+    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.2.15")
     implementation 'org.hibernate.orm:hibernate-core:6.6.1.Final'
     implementation 'org.hibernate.orm:hibernate-community-dialects:6.6.1.Final'
     implementation 'org.xerial:sqlite-jdbc:3.47.0.0'
