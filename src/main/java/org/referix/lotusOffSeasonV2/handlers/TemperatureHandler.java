@@ -134,10 +134,10 @@ public class TemperatureHandler {
 
 
 
-    public double calculateRelativeValue(double value) {
-        double relValue = (MIN_TEMPERATURE - value) / (MIN_TEMPERATURE - MAX_TEMPERATURE);
-        return Math.clamp(relValue, 0, 1);
-    }
+//    public double calculateRelativeValue(double value) {
+//        double relValue = (MIN_TEMPERATURE - value) / (MIN_TEMPERATURE - MAX_TEMPERATURE);
+//        return Math.clamp(relValue, 0, 1);
+//    }
 
 
 

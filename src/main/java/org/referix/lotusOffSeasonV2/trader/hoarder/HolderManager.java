@@ -23,9 +23,11 @@ import java.util.*;
 public class HolderManager implements Listener {
     private final Map<String, Holder> holders = new HashMap<>();
     private final NamespacedKey UNIQUE_ID_KEY; // Ключ для PersistentDataContainer
+
     private final HoarderConfig hoarderConfig; // Ссылка на конфигурацию
 
     // Конструктор HolderManager с передачей конфигурации
+
     public HolderManager(HoarderConfig hoarderConfig) {
         this.hoarderConfig = hoarderConfig;
         this.UNIQUE_ID_KEY = new NamespacedKey(LotusOffSeasonV2.getInstance(), "custom_holder");
@@ -33,7 +35,6 @@ public class HolderManager implements Listener {
         // Регистрация событий
         Bukkit.getPluginManager().registerEvents(this, LotusOffSeasonV2.getInstance());
     }
-
     public void loadHoldersFromFile() {
         File file = new File(LotusOffSeasonV2.getInstance().getDataFolder(), "holders.yml");
         if (!file.exists()) {
@@ -61,6 +62,7 @@ public class HolderManager implements Listener {
 
 
     // Добавление Holder в карту
+
     public void addHolder(Holder holder) {
         if (!holder.hasPreset()) {
             Bukkit.getLogger().warning("Пресет '" + holder.getVillagerPreset() + "' для Holder '" + holder.getName() + "' не существует.");
@@ -77,8 +79,8 @@ public class HolderManager implements Listener {
         Bukkit.getLogger().info("Holder добавлен: " + holder);
     }
 
-
     // Удаление Holder из карты и удаление связанного Villager
+
     public void removeHolder(String name) {
         Holder removedHolder = holders.remove(name);
         if (removedHolder != null) {
@@ -101,12 +103,11 @@ public class HolderManager implements Listener {
             Bukkit.getLogger().warning("Holder с именем (ID) " + name + " не найден.");
         }
     }
-
     // Поиск Holder по имени (ID)
+
     public Holder getHolderByName(String name) {
         return holders.get(name);
     }
-
     public List<String> getHolderNames() {
         return new ArrayList<>(holders.keySet());
     }
@@ -154,6 +155,7 @@ public class HolderManager implements Listener {
 
 
     // Конфигурация Villager
+
     private void configureVillager(Villager villager, List<MerchantRecipe> recipes, String customName) {
         villager.setCustomName(customName);
         villager.setCustomNameVisible(true);
@@ -169,8 +171,8 @@ public class HolderManager implements Listener {
         // Устанавливаем трейды
         villager.setRecipes(recipes);
     }
-
     // Защита жителей от повреждений
+
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Villager villager) {
@@ -181,7 +183,6 @@ public class HolderManager implements Listener {
             }
         }
     }
-
     public void updateHolderPreset(String name, String newVillagerPreset) {
         Holder holder = holders.get(name);
         if (holder == null) {
@@ -244,4 +245,8 @@ public class HolderManager implements Listener {
         }
     }
 
+
+    public HoarderConfig getHoarderConfig() {
+        return hoarderConfig;
+    }
 }

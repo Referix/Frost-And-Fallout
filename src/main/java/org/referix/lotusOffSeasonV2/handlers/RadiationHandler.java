@@ -14,7 +14,7 @@ public class RadiationHandler {
     private double MAX_RADIATION_SPEED = 2;
 
     private double MIN_RADIATION_VALUE = 0;
-    private double MAX_RADIATION_VALUE = 10;
+    private double MAX_RADIATION_VALUE = 20;
 
 
     private static final RadiationHandler instance = new RadiationHandler();

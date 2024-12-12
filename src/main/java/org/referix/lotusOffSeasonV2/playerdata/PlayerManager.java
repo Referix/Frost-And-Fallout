@@ -47,9 +47,9 @@ public class PlayerManager {
                     double temperatureResistance = data.getTemperatureResistance();
                     temperatureValue = TemperatureHandler.getInstance().calculate(player,temperatureValue,temperatureResistance);
                     data.setTemperatureValue(temperatureValue);
-//                    System.out.println("Winter: " + temperatureValue + " "  + temperatureResistance);
+                    System.out.println("Winter: " + temperatureValue + " "  + temperatureResistance);
 
-                   // radiation
+                    //radiation
                     double radiationValue = data.getRadiationValue();
                     double radiationResistance = data.getRadiationResistance();
                     radiationValue = RadiationHandler.getInstance().calculate(player,radiationValue,radiationResistance);

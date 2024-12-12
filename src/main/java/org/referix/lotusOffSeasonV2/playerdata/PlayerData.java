@@ -6,7 +6,7 @@ import org.referix.lotusOffSeasonV2.LotusOffSeasonV2;
 import org.referix.lotusOffSeasonV2.handlers.RadiationHandler;
 import org.referix.lotusOffSeasonV2.handlers.TemperatureHandler;
 
-public class PlayerData {
+public class PlayerData  {
     private final Player player;
 
     // Радіація

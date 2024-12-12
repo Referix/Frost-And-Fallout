@@ -19,6 +19,7 @@ import org.referix.lotusOffSeasonV2.item.eat.StandardEatItem;
 import org.referix.lotusOffSeasonV2.item.view.ViewType;
 import org.referix.lotusOffSeasonV2.item.view.OraxenViewView;
 import org.referix.lotusOffSeasonV2.item.view.StandardViewItem;
+import org.referix.lotusOffSeasonV2.utils.OraxenUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class CustomItemManager {
 
     private final Map<String, EatItem> eatItems = new HashMap<>();
 
-    private final boolean isOraxenEnabled;
+    private boolean isOraxenEnabled;
     public CustomItemManager() {
         this.isOraxenEnabled = Bukkit.getPluginManager().getPlugin("Oraxen") != null;
 
@@ -45,6 +46,10 @@ public class CustomItemManager {
         if (!file.exists()) {
             LotusOffSeasonV2.getInstance().saveResource("items.yml", false);
         }
+        if (!OraxenUtils.isOraxenEnable()){
+            LotusOffSeasonV2.getInstance().getLogger().warning("Oraxen не найден. Предметы из Oraxen будут пропущены.");
+        }
+        this.isOraxenEnabled = Bukkit.getPluginManager().getPlugin("Oraxen") != null;
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
@@ -57,6 +62,7 @@ public class CustomItemManager {
         // Загрузка eat_item
         loadEatItems(config);
     }
+
 
 
     private void loadStandardItems(FileConfiguration config) {
@@ -302,5 +308,16 @@ public class CustomItemManager {
 
     public ViewType getViewItem(String key) {
         return viewItems.get(key);
+    }
+
+
+    public void reloadItemConfig(){
+        try {
+            LotusOffSeasonV2.getInstance().getLogger().info("Items.yml reloading!");
+            loadItems();
+        } catch (Exception e){
+            LotusOffSeasonV2.getInstance().getLogger().warning("Items.yml reload failed");
+        }
+        LotusOffSeasonV2.getInstance().getLogger().info("Items.yml reload");
     }
 }

@@ -1,5 +1,6 @@
 package org.referix.lotusOffSeasonV2.command;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -37,10 +38,68 @@ public class MainCommand extends AbstractCommand {
         switch (category) {
             case "item" -> handleItemCommands(player, label, args);
             case "villager" -> handleVillagerCommands(player, label, args);
+            case "reload" -> reloadConfig(player, label, args);
             default -> player.sendMessage("Неизвестная категория. Используйте /" + label + " для помощи.");
         }
 
         return true;
+    }
+
+            // --- Command Reload ---
+    private void reloadConfig(Player player, String label, String[] args) {
+        if (args.length < 2) {
+            sendReloadHelp(player, label);
+        }
+//        if (args[0].equalsIgnoreCase("reload")){
+//            itemManager.reloadItemConfig();
+//        }
+        String reload = args[1].toLowerCase();
+
+        switch (reload) {
+            case "items" -> itemReloadCommand(player, label, args);
+            case "villager" -> villagerReloadCommand(player, label, args);
+            case "all" -> allReloadCommand(player, label, args);
+            case "help" -> sendReloadHelp(player, label);
+            default -> player.sendMessage("Неизвестная команда для item. Используйте /" + label + " item help.");
+        }
+
+    }
+
+    private void sendReloadHelp(Player player, String label) {
+        player.sendMessage("§aКоманды для reload:");
+        player.sendMessage("§7/" + label + " items - Reload items configuration");
+        player.sendMessage("§7/" + label + " villager - Reload villager configuration");
+        player.sendMessage("§7/" + label + " all - Reload all configuration");
+    }
+
+    private void itemReloadCommand(Player player, String label, String[] args) {
+        player.sendMessage("Reloading config " + args[1]);
+        try {
+            itemManager.reloadItemConfig();
+        } catch (Exception e) {
+            player.sendMessage("Config reload failed.");
+        }
+        player.sendMessage("Reload complete.");
+    }
+
+    private void villagerReloadCommand(Player player, String label, String[] args) {
+        player.sendMessage("Reloading config " + args[1]);
+        try {
+            holderManager.getHoarderConfig().reloadConfig();
+        } catch (Exception e) {
+            player.sendMessage("Config reload failed.");
+        }
+        player.sendMessage("Reload complete.");
+    }
+
+    private void allReloadCommand(Player player, String label, String[] args) {
+        player.sendMessage("Reloading config " + args[1]);
+        try {
+            villagerReloadCommand(player, label, args);
+            itemReloadCommand(player, label, args);
+        } catch (Exception e) {
+            player.sendMessage("Config reload failed.");
+        }
     }
 
 
@@ -49,6 +108,7 @@ public class MainCommand extends AbstractCommand {
         player.sendMessage("§aОсновные команды:");
         player.sendMessage("§7/" + label + " armor - Управление предметами (броня).");
         player.sendMessage("§7/" + label + " horder - Управление торговцами (Holder).");
+        player.sendMessage("§7/" + label + " reload - Reload Configs.");
         player.sendMessage("§7/" + label + " help - Показать эту справку.");
     }
 
