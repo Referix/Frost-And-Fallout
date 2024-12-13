@@ -3,22 +3,20 @@ package org.referix.lotusOffSeasonV2.command;
 
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Interaction;
 import org.bukkit.entity.Player;
 import org.referix.lotusOffSeasonV2.database.hibernate.savezone.SaveZoneData;
 import org.referix.lotusOffSeasonV2.database.hibernate.savezone.SaveZoneDataService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class SaveZoneCommand {
+public class SafeZoneCommand {
     private final SaveZoneDataService service;
 
     private Location pos1 = null;
     private Location pos2 = null;
 
-    public SaveZoneCommand(SaveZoneDataService service) {
+    public SafeZoneCommand(SaveZoneDataService service) {
         this.service = service;
     }
 
@@ -52,14 +50,14 @@ public class SaveZoneCommand {
                     player.sendMessage("set name to savezone: /lotus savezone save <назва>");
                     return true;
                 }
-                saveZoneToDB(player, pos1, pos2, args[1]);
+                saveZoneToDB(player, pos1, pos2, args[2]);
                 break;
             case "list":
                 player.sendMessage("Укажіть назву для зони. Наприклад: /<команда> save <назва>");
                 listZoneToDB(player);
                 return true;
             case "remove":
-                if (args.length < 2) {
+                if (args.length < 3) {
                     player.sendMessage("Укажіть назву для зони. Наприклад: /<команда> save <назва>");
                     return true;
                 }
@@ -73,8 +71,8 @@ public class SaveZoneCommand {
 
     private void removeZoneToDB(Player player, int id) {
         service.getAllSaveZones().forEach(saveZoneData -> {
-            if (saveZoneData.getStructureId() == id){
-                player.sendMessage("Сейв зону удаленно с названием: " + saveZoneData.getStructureName() + " ID: " + saveZoneData.getStructureId());
+            if (saveZoneData.getSafeZoneId() == id){
+                player.sendMessage("Сейв зону удаленно с названием: " + saveZoneData.getSafeZoneName() + " ID: " + saveZoneData.getSafeZoneId());
             }
         });
         service.removeProtectZone(id);
@@ -92,7 +90,7 @@ public class SaveZoneCommand {
 
         // Формуємо мапу з імен зон і їх ідентифікаторів
         HashMap<String, Integer> saveId = new HashMap<>();
-        saveZoneDatas.forEach(saveZoneData -> saveId.put(saveZoneData.getStructureName(), saveZoneData.getStructureId()));
+        saveZoneDatas.forEach(saveZoneData -> saveId.put(saveZoneData.getSafeZoneName(), saveZoneData.getSafeZoneId()));
 
         // Виводимо гравцю список зон
         player.sendMessage("Список зон:");

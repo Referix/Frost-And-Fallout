@@ -2,6 +2,7 @@ package org.referix.lotusOffSeasonV2.playerdata;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -11,6 +12,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.referix.lotusOffSeasonV2.LotusOffSeasonV2;
 import org.referix.lotusOffSeasonV2.handlers.RadiationHandler;
 import org.referix.lotusOffSeasonV2.handlers.TemperatureHandler;
+import org.referix.lotusOffSeasonV2.safezone.SafeZoneManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +43,7 @@ public class PlayerManager {
             @Override
             public void run() {
                 for (Player player : Bukkit.getOnlinePlayers()){
+                    if (!player.getGameMode().equals(GameMode.SURVIVAL)) continue;
                     PlayerData data = getPlayerData(player);
                     //winter
                     double temperatureValue = data.getTemperatureValue();
@@ -64,7 +67,6 @@ public class PlayerManager {
             }
         }.runTaskTimer(LotusOffSeasonV2.getInstance(), 0, 20);
     }
-
 
 
 

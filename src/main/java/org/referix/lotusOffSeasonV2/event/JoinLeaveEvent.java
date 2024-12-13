@@ -2,8 +2,10 @@ package org.referix.lotusOffSeasonV2.event;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.referix.lotusOffSeasonV2.database.hibernate.playerdata.PlayerDataBase;
 import org.referix.lotusOffSeasonV2.database.hibernate.playerdata.PlayerDataService;
 import org.referix.lotusOffSeasonV2.playerdata.PlayerData;
@@ -14,6 +16,13 @@ public class JoinLeaveEvent implements Listener {
 
     public JoinLeaveEvent(PlayerDataService playerDataService) {
         this.playerDataService = playerDataService;
+    }
+
+    @EventHandler
+    public void playerDeath(PlayerRespawnEvent e){
+        PlayerData playerData = PlayerManager.getInstance().getPlayerData(e.getPlayer());
+        playerData.setRadiationValue(0);
+        playerData.setTemperatureValue(20);
     }
 
 

@@ -8,7 +8,7 @@ import org.referix.lotusOffSeasonV2.LotusOffSeasonV2;
 public class CampfireObserver {
     private final Block block;
 
-    private int CAMPFIRE_INT = 20;
+    private int CAMPFIRE_INT = 20 * 60 * 2;
     //task
     private boolean isExtinguishingScheduled = false;
 

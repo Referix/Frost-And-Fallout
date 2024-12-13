@@ -27,7 +27,7 @@ public class SaveZoneData {
         this.locationValue = locationValue;
     }
 
-    public String getStructureName() {
+    public String getSafeZoneName() {
         return structureName;
     }
 
@@ -35,7 +35,7 @@ public class SaveZoneData {
         return locationValue;
     }
 
-    public int getStructureId() {
+    public int getSafeZoneId() {
         return structureId;
     }
 

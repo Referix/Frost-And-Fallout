@@ -33,33 +33,37 @@ public class PlayerBar {
     }
 
     private void updateActionBar(Player player) {
-        ViewType customItem = itemManager.getViewItemByItemStack(player.getInventory().getItemInMainHand());
+        ViewType customItem;
+        customItem = itemManager.getViewItemByItemStack(player.getInventory().getItemInMainHand());
+        if (customItem == null) {
+            customItem = itemManager.getViewItemByItemStack(player.getInventory().getItemInOffHand());
+        }
 
         PlayerData playerData = PlayerManager.getInstance().getPlayerData(player);
         double radiation = playerData.getRadiationValue();
         double temperature = playerData.getTemperatureValue();
 
-        String radiationBar = "";
-        String temperatureBar = "";
+        Component radiationBar = Component.text("");
+        Component temperatureBar = Component.text("");
 
         if (customItem != null) {
 
             if ("RADIATION".equalsIgnoreCase(customItem.getViewType())) {
-                radiationBar = RadiationHandler.getInstance().createProgressBar(radiation,"Радиация:");
+                radiationBar = RadiationHandler.getInstance().createProgressBar(radiation,"☢", true);
             }
 
             else if ("TEMPERATURE".equalsIgnoreCase(customItem.getViewType())) {
-                temperatureBar = TemperatureHandler.getInstance().createProgressBar(temperature, "Температура",true);
+                temperatureBar = TemperatureHandler.getInstance().createProgressBar(temperature, "\uD83C\uDF21",true);
             }
         }
 
-        if (radiationBar.isEmpty() && temperatureBar.isEmpty()) {
-            temperatureBar = TemperatureHandler.getInstance().createProgressBar(temperature, "Температура",false);
+        if (radiationBar.equals(Component.empty()) && temperatureBar.equals(Component.empty())) {
+            temperatureBar = TemperatureHandler.getInstance().createProgressBar(temperature, "\uD83C\uDF21", false);
         }
 
-        String actionBarMessage = String.join("  ", radiationBar, temperatureBar).trim();
+        Component actionBarMessage = radiationBar.append(Component.text("  ")).append(temperatureBar);
 
-        player.sendActionBar(Component.text(actionBarMessage));
+        player.sendActionBar(actionBarMessage);
     }
 
 

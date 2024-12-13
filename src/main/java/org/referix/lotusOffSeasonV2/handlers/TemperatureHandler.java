@@ -1,18 +1,19 @@
 package org.referix.lotusOffSeasonV2.handlers;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Campfire;
-import org.bukkit.block.data.type.Furnace;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.referix.lotusOffSeasonV2.LotusOffSeasonV2;
 import org.referix.lotusOffSeasonV2.helpers.CampfireObserver;
+import org.referix.lotusOffSeasonV2.playerdata.PlayerData;
 import org.referix.lotusOffSeasonV2.playerdata.PlayerManager;
+import org.referix.lotusOffSeasonV2.safezone.SafeZoneManager;
 
 import java.util.Random;
 
@@ -23,23 +24,28 @@ public class TemperatureHandler {
     private double MIN_TEMPERATURE = -40;
 
     private double HEIGHT_LOW = 50;
-    private double HEIGHT_HIGH = 80;
+    private double HEIGHT_HIGH = 100;
 
-    private double MAX_HEIGHT_SPEED = -6;
+    private double MAX_HEIGHT_SPEED = -2;
 
-    private double RADIUS_HIGH = 80;
-    private double RADIUS_MIDDLE = 64;
-    private double RADIUS_LOW = 48;
-    private double RADIUS_NEUTRAL = 32;
+    private double RADIUS_HIGH = 2000;
+    private double RADIUS_MIDDLE = 1200;
+    private double RADIUS_LOW = 800;
+    private double RADIUS_NEUTRAL = 500;
 
-    private double RADIUS_HIGH_SPEED = -8;
-    private double RADIUS_LOW_SPEED = -2;
-    private double RADIUS_NEUTRAL_SPEED = -1;
+    private double RADIUS_HIGH_SPEED = -4;
+    private double RADIUS_MIDDLE_SPEED = -2;
+    private double RADIUS_LOW_SPEED = -1;
+    private double RADIUS_NEUTRAL_SPEED = -0.25;
 
     private double MAX_COLD_SPEED = MAX_HEIGHT_SPEED + RADIUS_HIGH_SPEED;
 
     //Furnace
     private double FURNACE_SPEED = 1;
+
+
+
+    private  double MAX_DAMAGE_PER_SEC = 2.0;
 
 
     private static final TemperatureHandler instance = new TemperatureHandler();
@@ -49,6 +55,9 @@ public class TemperatureHandler {
     }
 
     public double calculate(Player player, double value, double resistance){
+        if (SafeZoneManager.getInstance().isPlayerInAnyZone(player)){
+            return Math.max(value + (2 * FURNACE_SPEED), MAX_TEMPERATURE);
+        }
         double speed = 0;
         double new_value = value + resistance;
 
@@ -86,7 +95,6 @@ public class TemperatureHandler {
         double distance = Math.sqrt(x*x + z*z);
 
         double radiusColdSpeed = 0;
-        double RADIUS_MIDDLE_SPEED = -4;
         if (distance > RADIUS_HIGH) radiusColdSpeed = RADIUS_HIGH_SPEED;
         else if (distance > RADIUS_MIDDLE) radiusColdSpeed = RADIUS_MIDDLE_SPEED;
         else if (distance > RADIUS_LOW) radiusColdSpeed = RADIUS_LOW_SPEED;
@@ -141,20 +149,38 @@ public class TemperatureHandler {
 
 
 
-    public String createProgressBar(double absoluteValue, String label,boolean showValue) {
-        int totalBars = 10; // Общая длина полоски
-        double relValue = 1 - (MIN_TEMPERATURE - absoluteValue) / (MIN_TEMPERATURE - MAX_TEMPERATURE);
-        relValue = Math.clamp(relValue, 0, 1);
-        int filledBars = (int) Math.round(relValue * totalBars); // Количество заполненных
 
-        StringBuilder bar = new StringBuilder(label + ": ");
+    public Component createProgressBar(double absoluteValue, String label, boolean showValue) {
+        int totalBars = 30; // Общая длина полоски
+
+        double relValue = (MIN_TEMPERATURE - absoluteValue) / (MIN_TEMPERATURE - MAX_TEMPERATURE);
+        relValue = Math.clamp(relValue, 0, 1);
+
+        int filledBars = (int) Math.round(relValue * totalBars); // Количество заполненных
+        int coldBars = (int) Math.round((MIN_PLAYER_TEMPERATURE - MIN_TEMPERATURE) / (MAX_TEMPERATURE - MIN_TEMPERATURE) * totalBars);
+        // int hotBars = totalBars - coldBars;
+
+        // Начало компонента прогресс-бара
+        Component progressBar = Component.text(label);
+
+        progressBar = progressBar.append(Component.text(" ["));
+
         for (int i = 0; i < totalBars; i++) {
-            bar.append(i < filledBars ? "█" : "░");
+            String c = i < filledBars ? "|" : "."; // Заполненный или пустой сегмент
+            TextColor color = (i < coldBars) ? TextColor.color(0x22CCFF) : TextColor.color(0xFF7733); // Красный или синий
+            progressBar = progressBar.append(Component.text(c).color(color));
         }
+
+        progressBar = progressBar.append(Component.text("]"));
+
         if (showValue) {
-            return String.format("%s %2.1f", bar, absoluteValue);
-        } else return String.format("%s", bar);
+            String numberValue = String.format("%2.1f", absoluteValue);
+            progressBar = progressBar.append(Component.text(numberValue).color(TextColor.color(0xFFFFFF)));
+        }
+
+        return progressBar;
     }
+
 
     public double clamped(double value){
         return Math.clamp(value,MIN_TEMPERATURE,MAX_TEMPERATURE);
@@ -164,18 +190,26 @@ public class TemperatureHandler {
 //    private double MIN_PLAYER_TEMPERATURE = 0;
 //    private double MIN_TEMPERATURE = -40;
 
+    //
+
+
     public void applyDamageEffect(Player player,double temperatureValue) {
         if (temperatureValue > MIN_PLAYER_TEMPERATURE) return;
+
         PotionEffect slowEffect = new PotionEffect(PotionEffectType.SLOWNESS, 200, 1);
         PotionEffect weaknessEffect = new PotionEffect(PotionEffectType.WEAKNESS, 200, 1);
+
         double hp = player.getHealth();
-        hp = Math.max(0, hp - 1);
+        double gamage = Math.max(0.5, MAX_DAMAGE_PER_SEC * temperatureValue / (MIN_PLAYER_TEMPERATURE - MIN_TEMPERATURE));
+        hp = Math.max(0, hp - gamage);
+
+
         player.setHealth(hp);
         if (!player.hasPotionEffect(PotionEffectType.SLOWNESS) && !player.hasPotionEffect(PotionEffectType.WEAKNESS)) {
             player.sendMessage(ChatColor.RED + "Вы замерзаете!");
             player.addPotionEffect(slowEffect);
             player.addPotionEffect(weaknessEffect);
-            player.setFreezeTicks(600); // 30 секунд замороження
+            player.setFreezeTicks(20*5); // 30 секунд замороження
             int random = new Random().nextInt(100);
             if (random < 30) {
                 if (!player.getInventory().getItemInMainHand().getType().isAir()) {
@@ -191,6 +225,12 @@ public class TemperatureHandler {
             }
         }
     }
+
+//    public void applySafeEffects(Player player){
+//        PlayerData playerData = PlayerManager.getInstance().getPlayerData(player);
+//        double temperatureValue = playerData.getTemperatureValue()+1;
+//        playerData.setTemperatureValue(temperatureValue);
+//    }
 
 //    private static boolean isCampfire(Block block) {
 //        if (block.getType() == Material.CAMPFIRE || block.getType() == Material.SOUL_CAMPFIRE) {

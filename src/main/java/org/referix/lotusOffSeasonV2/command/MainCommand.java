@@ -1,9 +1,9 @@
 package org.referix.lotusOffSeasonV2.command;
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.referix.lotusOffSeasonV2.database.hibernate.savezone.SaveZoneDataService;
 import org.referix.lotusOffSeasonV2.item.CustomItemManager;
 import org.referix.lotusOffSeasonV2.trader.hoarder.Holder;
 import org.referix.lotusOffSeasonV2.trader.hoarder.HolderManager;
@@ -14,11 +14,13 @@ import java.util.List;
 public class MainCommand extends AbstractCommand {
     private final CustomItemManager itemManager;
     private final HolderManager holderManager;
+    private final SafeZoneCommand saveZoneCommand;
 
-    public MainCommand(String command, CustomItemManager itemManager, HolderManager holderManager) {
+    public MainCommand(String command, CustomItemManager itemManager, HolderManager holderManager, SaveZoneDataService saveZoneDataService) {
         super(command);
         this.itemManager = itemManager;
         this.holderManager = holderManager;
+        this.saveZoneCommand =new SafeZoneCommand(saveZoneDataService);
     }
 
     @Override
@@ -38,6 +40,7 @@ public class MainCommand extends AbstractCommand {
         switch (category) {
             case "item" -> handleItemCommands(player, label, args);
             case "villager" -> handleVillagerCommands(player, label, args);
+            case "savezone" -> saveZoneCommand.execute(player, label,args);
             case "reload" -> reloadConfig(player, label, args);
             default -> player.sendMessage("Неизвестная категория. Используйте /" + label + " для помощи.");
         }
@@ -412,13 +415,15 @@ public class MainCommand extends AbstractCommand {
 
         if (args.length == 1) {
             // Предлагаем категории верхнего уровня
-            suggestions.addAll(List.of("item", "villager"));
+            suggestions.addAll(List.of("item", "villager", "savezone"));
         } else if (args.length == 2) {
             String category = args[0].toLowerCase();
             if ("item".equals(category)) {
                 suggestions.addAll(List.of("armor", "view", "eat", "help"));
             } else if ("villager".equals(category)) {
                 suggestions.addAll(List.of("horder", "help"));
+            } else if ("savezone".equals(category)) {
+                suggestions.addAll(List.of("pos1", "pos2", "save","list"));
             }
         } else if (args.length == 3) {
             String category = args[0].toLowerCase();
@@ -431,6 +436,11 @@ public class MainCommand extends AbstractCommand {
                 }
             } else if ("villager".equals(category) && "horder".equals(subCommand)) {
                 suggestions.addAll(List.of("create", "remove", "info", "list"));
+//            } else if ("savezone".equals(category)) {
+////                if ("save".equals(subCommand)) {
+////                    // Предлагаем список сохранённых зон
+////                    //suggestions.addAll(.getSavedZoneNames());
+////                }
             }
         } else if (args.length == 4) {
             String category = args[0].toLowerCase();
@@ -464,6 +474,7 @@ public class MainCommand extends AbstractCommand {
 
         return suggestions;
     }
+
 
 
 
