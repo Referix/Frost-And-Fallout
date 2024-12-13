@@ -56,7 +56,7 @@ public class TemperatureHandler {
 
     public double calculate(Player player, double value, double resistance){
         if (SafeZoneManager.getInstance().isPlayerInAnyZone(player)){
-            return Math.max(value + (2 * FURNACE_SPEED), MAX_TEMPERATURE);
+            return Math.clamp(value + (2 * FURNACE_SPEED), MIN_TEMPERATURE,MAX_TEMPERATURE);
         }
         double speed = 0;
         double new_value = value + resistance;
