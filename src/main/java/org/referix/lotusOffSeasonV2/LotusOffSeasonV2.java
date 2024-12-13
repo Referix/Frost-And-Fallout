@@ -8,6 +8,7 @@ import org.referix.lotusOffSeasonV2.database.hibernate.savezone.SaveZoneDataServ
 import org.referix.lotusOffSeasonV2.database.hibernate.structures.StructureDataService;
 import org.referix.lotusOffSeasonV2.database.hibernate.structures.StructureDataServiceImpl;
 import org.referix.lotusOffSeasonV2.event.EatEvent;
+import org.referix.lotusOffSeasonV2.event.GoatDropEvent;
 import org.referix.lotusOffSeasonV2.event.JoinLeaveEvent;
 import org.referix.lotusOffSeasonV2.item.CustomItemManager;
 import org.referix.lotusOffSeasonV2.command.MainCommand;
@@ -51,6 +52,7 @@ public final class LotusOffSeasonV2 extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EatEvent(itemManager),this);
         getServer().getPluginManager().registerEvents(new JoinLeaveEvent(playerDataBase),this);
         getLogger().info("Предметы загружены из items.yml.");
+        getServer().getPluginManager().registerEvents(new GoatDropEvent(),this);
 
         new PlayerBar(this,itemManager);
 
